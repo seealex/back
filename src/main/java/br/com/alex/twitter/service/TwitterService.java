@@ -1,33 +1,21 @@
 package br.com.alex.twitter.service;
 
-import br.com.alex.twitter.dto.TwitteDto;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
 import lombok.extern.log4j.Log4j2;
 import org.apache.tomcat.util.codec.binary.Base64;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.web.JsonPath;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
+import twitter4j.*;
+import twitter4j.conf.ConfigurationBuilder;
 
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Array;
-import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -38,75 +26,47 @@ public class TwitterService {
 
     private final String API_KEY = "";
     private final String API_SECRET_KEY = "";
-    private final String HOST = "https://api.twitter.com/oauth2/token";
-    private final String HOST_SEARCH = "https://api.twitter.com/1.1/search/tweets.json?q=";
-    private String token;
+    private final String ACCESS_TOKEN = "27421567-";
+    private final String ACCESS_TOKEN_SECRET = "";
 
-    private RestTemplate restTemplate = new RestTemplate();
+    private Twitter configurationForTwitter() {
+        ConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
+                .setDebugEnabled(true)
+                .setOAuthConsumerKey(API_KEY)
+                .setOAuthConsumerSecret(API_SECRET_KEY)
+                .setOAuthAccessToken(ACCESS_TOKEN)
+                .setOAuthAccessTokenSecret(ACCESS_TOKEN_SECRET);
 
-    @Autowired
-    private ModelMapper modelMapper;
+        TwitterFactory twitterFactory = new TwitterFactory(configurationBuilder.build());
 
-    private HttpHeaders createHeaders(String username, String password){
-        return new HttpHeaders() {{
-            String auth = username + ":" + password;
-            byte[] encodedAuth = Base64.encodeBase64(
-                    auth.getBytes(Charset.forName("US-ASCII")) );
-            String authHeader = "Basic " + new String( encodedAuth );
-            set( "Authorization", authHeader );
-            set( "Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE);
-        }};
+        return twitterFactory.getInstance();
     }
 
-    private HttpHeaders createHeadersTwitter(String token){
-        return new HttpHeaders() {{
-            set( "Authorization", "Bearer " + token );
-            set( "Content-Type", MediaType.APPLICATION_JSON_UTF8_VALUE);
-        }};
-    }
-
-    @PostConstruct
-    public void getAccessToken(){
-        MultiValueMap<String, String> bodyMap = new LinkedMultiValueMap<String, String>();
-        bodyMap.set("grant_type", "client_credentials");
-
-        HttpEntity entity = new HttpEntity<>(bodyMap, createHeaders(API_KEY, API_SECRET_KEY));
-
-        ResponseEntity<Map> response = restTemplate.exchange(HOST, HttpMethod.POST, entity, Map.class);
-
-        this.token = (String) Objects.requireNonNull(response.getBody()).get("access_token");
-
-        log.info(response.getStatusCode());
-    }
-
-    public Object findByTag(String tag) throws IOException {
-        HttpEntity entity = new HttpEntity<>(null, createHeadersTwitter(token));
-        ResponseEntity<Map> response = restTemplate.exchange(HOST_SEARCH + encodeTag("#"+tag) + "&count=100", HttpMethod.GET, entity, Map.class);
-
-        //ObjectMapper mapper = new ObjectMapper();
-        //mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-        Gson gson = new Gson();
-
-        JsonReader reader = new JsonReader(new StringReader(response.getBody().get("statuses").toString()));
-        reader.setLenient(true);
-
-        Type collectionType = new TypeToken<Collection<TwitteDto>>(){}.getType();
-
-        Collection<TwitteDto> obj = gson.fromJson(reader, collectionType);
-        //JSON file to Java object
-        //List<TwitteDto> obj = mapper.readValue(response.getBody().get("statuses").toString(), new TypeReference<List<TwitteDto>>(){});
-        System.out.println(obj);
-
-        return response.getBody().get("statuses");
-
-    }
-
-    private static String encodeTag(String tag) {
-        try {
-            return URLEncoder.encode(tag, StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException ex) {
-            log.error(ex.getMessage());
-            return null;
+    public List<Status> getStatusByHashtags(List<String> hashtags) {
+        List<Status> statuses = new ArrayList<Status>();
+        for (String ht : hashtags) {
+            if (!StringUtils.isEmpty(ht))
+                statuses.addAll(findByTag(ht));
         }
+
+        return statuses;
     }
+
+    public List<Status> findByTag(String tag){
+        List<Status> statuses = null;
+
+        if (!StringUtils.isEmpty(tag))
+            throw new RuntimeException("hashtag can not by empty");
+
+        log.info(String.format("fetching posts to hashtag [%s]", tag));
+        try {
+            QueryResult queryResult = configurationForTwitter().search(new Query(tag));
+            statuses = queryResult.getTweets();
+        } catch (TwitterException e) {
+            log.error(String.format("error fetching posts to hashtag [%s]", tag), e);
+        }
+
+        return statuses;
+    }
+
 }

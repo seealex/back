@@ -1,5 +1,6 @@
 package br.com.alex.twitter.controller;
 
+import br.com.alex.twitter.service.IntegrationService;
 import br.com.alex.twitter.service.TwitterService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +18,24 @@ import java.io.IOException;
 public class IntegrationController {
 
     @Autowired
-    private TwitterService twitterService;
+    private IntegrationService integrationService;
 
-    @GetMapping("/{tag}")
-    public ResponseEntity<?> findByTag(@PathVariable("tag") String tag) throws IOException {
-        log.info("by tag:" + tag);
-        return ResponseEntity.ok(twitterService.findByTag(tag));
+    @GetMapping()
+    public ResponseEntity<?> topFiveByFollowers() throws IOException {
+        log.info("find to five users by Followers count in data base");
+        return ResponseEntity.ok(integrationService.topFiveFollowers());
+    }
+
+    @GetMapping()
+    public ResponseEntity<?> totalPostByHours() throws IOException {
+        log.info("find total post by hours in data base");
+        return ResponseEntity.ok(integrationService.totalPostByHours());
+    }
+
+    @GetMapping()
+    public ResponseEntity<?> totalPostByUserIdiomCountry() throws IOException {
+        log.info("find total post by hours in data base");
+        return ResponseEntity.ok(integrationService.totalPostByUserIdiomCountry());
     }
 
 }
