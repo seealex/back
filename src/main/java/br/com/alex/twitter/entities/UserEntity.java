@@ -1,16 +1,13 @@
 package br.com.alex.twitter.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import twitter4j.TweetEntity;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Set;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "USER")
 public class UserEntity {
 
     @Id
@@ -19,6 +16,4 @@ public class UserEntity {
     private Long followers;
     private String idiom;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private Set<TweetEntity> tweets;
 }

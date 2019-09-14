@@ -24,10 +24,10 @@ import java.util.Objects;
 @Log4j2
 public class TwitterService {
 
-    private final String API_KEY = "";
-    private final String API_SECRET_KEY = "";
-    private final String ACCESS_TOKEN = "27421567-";
-    private final String ACCESS_TOKEN_SECRET = "";
+    private final String API_KEY = "HKGtpFhgP15wfRrTdNkfpwiYB";
+    private final String API_SECRET_KEY = "hTA1OhLLwetfLslCiNNmBhaGlGpCZHYHHsUPM1bN4f2AXVGruN";
+    private final String ACCESS_TOKEN = "27421567-9hbVmOA1zbjOZ2sDIbrushDw27R9hQleCcxXj1iws";
+    private final String ACCESS_TOKEN_SECRET = "zexVgHJxjhPusERjWVzHvAU3olDY3TpXkQHwuBY8xAXP9";
 
     private Twitter configurationForTwitter() {
         ConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
@@ -55,7 +55,7 @@ public class TwitterService {
     public List<Status> findByTag(String tag){
         List<Status> statuses = null;
 
-        if (!StringUtils.isEmpty(tag))
+        if (StringUtils.isEmpty(tag))
             throw new RuntimeException("hashtag can not by empty");
 
         log.info(String.format("fetching posts to hashtag [%s]", tag));
