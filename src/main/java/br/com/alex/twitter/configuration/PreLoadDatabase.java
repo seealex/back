@@ -46,28 +46,26 @@ public class PreLoadDatabase {
 
             log.info("collect form Twitter service started");
 
-            statuses.stream().forEach(s -> {
+            statuses.parallelStream().forEach(s -> {
 
                         UserEntity user = new UserEntity(s.getUser().getId(), String.format("@%s", s.getUser().getScreenName()), Long.valueOf(s.getUser().getFollowersCount()), s.getUser().getLang());
 
-                        HashtagEntity tags[] = s.getHashtagEntities();
-                        Set<TagEntity> tagEntityList = new Collections.emptySet();
-                        Arrays.stream(tags).filter(x -> hash.contains("#" + x.getText().toLowerCase())).forEach(h -> {
-                                    TagEntity tagEntity = new TagEntity();
-                                    tagEntity.setTag(h.getText().toLowerCase());
-                                    tagEntityList.add(tagEntity);
-                                }
-                        );
+                        TweetEntity tweet = new TweetEntity();
+                                tweet.setId(s.getId());
+                                tweet.setCreatedAt(s.getCreatedAt());
+                                tweet.setUser(user);
 
-                TweetEntity tweet = new TweetEntity();
-                tweet.setId(s.getId());
-                tweet.setCreatedAt(s.getCreatedAt());
-                tweet.setUser(user);
-                tweet.setTags(tagEntityList);
-                tweetRepository.save(tweet);
+                                HashtagEntity tags[] = s.getHashtagEntities();
+                                Arrays.stream(tags).filter(x -> hash.contains("#" + x.getText().toLowerCase())).forEach(h -> {
+                                            TagEntity tagEntity = new TagEntity();
+                                            tagEntity.setTag(h.getText().toLowerCase());
+                                            tweet.getTags().add(tagEntity);
+                                        }
+                                );
 
-                    }
-            );
+                                tweetRepository.save(tweet);
+                            }
+                    );
 
             log.info("collect and save finished");
         };

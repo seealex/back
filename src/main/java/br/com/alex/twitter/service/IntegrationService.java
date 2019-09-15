@@ -45,6 +45,6 @@ public class IntegrationService {
                 usersVO.add(new UserTopFiveWithMoreFollowersVO(u.getId(), u.getScreenName(), u.getFollowers()))
         );
 
-        return null;
+        return usersVO;
     }
 }
