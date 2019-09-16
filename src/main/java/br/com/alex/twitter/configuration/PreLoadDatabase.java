@@ -32,39 +32,45 @@ public class PreLoadDatabase {
         return args -> {
             List<String> hash = new ArrayList<String>();
             hash.add("#openbanking");
-            //hash.add("#apifirst");
-            //hash.add("#devops");
-            //hash.add("#cloudfirst");
-            //hash.add("#microservices");
-            //hash.add("#apigateway");
-            //hash.add("#oauth");
-            //hash.add("#swagger");
-            //hash.add("#raml");
-            //hash.add("#openapis");
+            hash.add("#apifirst");
+            hash.add("#devops");
+            hash.add("#cloudfirst");
+            hash.add("#microservices");
+            hash.add("#apigateway");
+            hash.add("#oauth");
+            hash.add("#swagger");
+            hash.add("#raml");
+            hash.add("#openapis");
 
             List<Status> statuses = twitterService.getStatusByHashtags(hash);
 
             log.info("collect form Twitter service started");
 
-            statuses.parallelStream().forEach(s -> {
-
-                        UserEntity user = new UserEntity(s.getUser().getId(), String.format("@%s", s.getUser().getScreenName()), Long.valueOf(s.getUser().getFollowersCount()), s.getUser().getLang());
+            statuses.forEach(s -> {
+                        UserEntity userSaved = null;
+                        Optional<UserEntity> user = userRepository.findById(s.getUser().getId());
+                        if(user.isPresent()) {
+                            userSaved = user.get();
+                        }else{
+                            UserEntity userNew = new UserEntity(s.getUser().getId(), String.format("@%s", s.getUser().getScreenName()), (long) s.getUser().getFollowersCount(), s.getUser().getLang());
+                            userSaved = userRepository.saveAndFlush(userNew);
+                        }
 
                         TweetEntity tweet = new TweetEntity();
-                                tweet.setId(s.getId());
-                                tweet.setCreatedAt(s.getCreatedAt());
-                                tweet.setUser(user);
+                        tweet.setId(s.getId());
+                        tweet.setCreatedAt(s.getCreatedAt());
+                        tweet.setUser(userSaved);
 
-                                HashtagEntity tags[] = s.getHashtagEntities();
-                                Arrays.stream(tags).filter(x -> hash.contains("#" + x.getText().toLowerCase())).forEach(h -> {
-                                            TagEntity tagEntity = new TagEntity();
-                                            tagEntity.setTag(h.getText().toLowerCase());
-                                            tweet.getTags().add(tagEntity);
-                                        }
-                                );
+                        HashtagEntity[] tags = s.getHashtagEntities();
+                        Arrays.stream(tags).filter(x -> hash.contains("#" + x.getText().toLowerCase())).forEach(h -> {
+                                    TagEntity tagEntity = new TagEntity();
+                                    tagEntity.setTag(h.getText().toLowerCase());
+                                    tweet.getTags().add(tagEntity);
+                                }
+                        );
 
-                                tweetRepository.save(tweet);
-                            }
+                        tweetRepository.saveAndFlush(tweet);
+                        }
                     );
 
             log.info("collect and save finished");

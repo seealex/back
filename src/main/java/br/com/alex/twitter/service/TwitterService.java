@@ -60,7 +60,9 @@ public class TwitterService {
 
         log.info(String.format("fetching posts to hashtag [%s]", tag));
         try {
-            QueryResult queryResult = configurationForTwitter().search(new Query(tag));
+            Query query = new Query(tag);
+            query.count(100);
+            QueryResult queryResult = configurationForTwitter().search(query);
             statuses = queryResult.getTweets();
         } catch (TwitterException e) {
             log.error(String.format("error fetching posts to hashtag [%s]", tag), e);
