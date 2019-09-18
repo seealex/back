@@ -16,8 +16,10 @@ import org.springframework.core.annotation.Order;
 import twitter4j.HashtagEntity;
 import twitter4j.Status;
 
-import javax.transaction.Transactional;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 @Log4j2
 @Configuration

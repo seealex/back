@@ -1,7 +1,6 @@
 package br.com.alex.twitter.repositories;
 
 import br.com.alex.twitter.entities.TagEntity;
-import br.com.alex.twitter.entities.TweetEntity;
 import br.com.alex.twitter.vo.TweetByTagByUserIdiomVO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,13 +15,4 @@ public interface TagRepository  extends JpaRepository<TagEntity, Long> {
              "GROUP BY tg.tag, u.idiom ")
      public List<TweetByTagByUserIdiomVO> listTweetAmountByTagsByUser();
 
-     /*
-    @Query(value = "SELECT tg.TAG hastTag, u.idiom, count(tw.id) tweets \n" +
-            "FROM  tweet tw \n" +
-            "INNER JOIN TAG tg on tg.id_tweet = tw.id \n" +
-            "INNER JOIN USER u on tw.USER_ID = u.ID \n" +
-            "GROUP BY tg.TAG, u.idiom", nativeQuery = true)
-    public List<TweetByTagByUserIdiomVO> listTweetAmountByTagsByUsern();
-    *
-      */
 }

@@ -1,33 +1,30 @@
 package br.com.alex.twitter.service;
 
 import lombok.extern.log4j.Log4j2;
-import org.apache.tomcat.util.codec.binary.Base64;
-import org.springframework.http.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
 import twitter4j.*;
 import twitter4j.conf.ConfigurationBuilder;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 @Service
 @Log4j2
 public class TwitterService {
 
-    private final String API_KEY = "HKGtpFhgP15wfRrTdNkfpwiYB";
-    private final String API_SECRET_KEY = "hTA1OhLLwetfLslCiNNmBhaGlGpCZHYHHsUPM1bN4f2AXVGruN";
-    private final String ACCESS_TOKEN = "27421567-9hbVmOA1zbjOZ2sDIbrushDw27R9hQleCcxXj1iws";
-    private final String ACCESS_TOKEN_SECRET = "zexVgHJxjhPusERjWVzHvAU3olDY3TpXkQHwuBY8xAXP9";
+    @Value("${api.key}")
+    private String API_KEY;
+
+    @Value("${api.key.secret}")
+    private String API_SECRET_KEY;
+
+    @Value("${api.access.token}")
+    private String ACCESS_TOKEN;
+
+    @Value("${api.access.token.secret}")
+    private String ACCESS_TOKEN_SECRET;
 
     private Twitter configurationForTwitter() {
         ConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
