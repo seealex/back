@@ -3,6 +3,7 @@ buildscript {
 		mavenCentral()
 	}
 	dependencies {
+		classpath('gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.13.0')
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.8.RELEASE")
 	}
 }
@@ -13,8 +14,7 @@ plugins {
 	id 'java'
 }
 
-group = 'br.com.alex'
-version = '0.0.1-SNAPSHOT'
+group = 'br.com.alex.twitter'
 sourceCompatibility = '1.8'
 
 configurations {
@@ -23,14 +23,22 @@ configurations {
 	}
 }
 
+configurations.all {
+	exclude module : 'spring-boot-starter-logging'
+}
+
 repositories {
 	mavenCentral()
 	jcenter()
 }
 
 dependencies {
-	compile("org.springframework.boot:spring-boot-starter-web")
-	compile("org.springframework.boot:spring-boot-starter-logging")
+	compile ('org.springframework.boot:spring-boot-starter') {
+		exclude module : 'spring-boot-starter-logging'
+	}
+	compile ('org.springframework.boot:spring-boot-starter-web') {
+		exclude module : 'spring-boot-starter-logging'
+	}
 	compile("org.springframework.boot:spring-boot-starter-log4j2")
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	compileOnly 'org.projectlombok:lombok'
@@ -47,5 +55,18 @@ apply plugin: 'application'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'com.palantir.docker'
 
 mainClassName = 'br.com.alex.twitter.Application'
+
+task unpack(type: Copy) {
+	dependsOn bootJar
+	from(zipTree(tasks.bootJar.outputs.files.singleFile))
+	into("build/dependency")
+}
+docker {
+	name "x1alex/tweetit"
+	copySpec.from(tasks.unpack.outputs).into("dependency")
+	buildArgs(['DEPENDENCY': "dependency"])
+	noCache true
+}
