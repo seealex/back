@@ -39,7 +39,7 @@ public class IntegrationController {
         return new ResponseEntity<>(tweets, HttpStatus.OK);
     }
 
-    @GetMapping("/byUserIdiomCOuntry")
+    @GetMapping("/byUserIdiomCountry")
     @ApiOperation(value = "Retorna total de postagens para cada uma das #tag por idioma/país do usuário que postou")
     public ResponseEntity<?> totalPostByUserIdiomCountry() {
         log.info("find total post by hours in data base");

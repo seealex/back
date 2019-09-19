@@ -57,7 +57,7 @@ public class PreLoadDatabase {
                         if(user.isPresent()) {
                             userSaved = user.get();
                         }else{
-                            UserEntity userNew = new UserEntity(s.getUser().getId(), String.format("@%s", s.getUser().getScreenName()), (long) s.getUser().getFollowersCount(), s.getUser().getLang());
+                            UserEntity userNew = new UserEntity(s.getUser().getId(), String.format("@%s", s.getUser().getScreenName()), (long) s.getUser().getFollowersCount(), (s.getUser().getLang() != null)?s.getUser().getLang():s.getUser().getLocation());
                             userSaved = userRepository.saveAndFlush(userNew);
                         }
 
