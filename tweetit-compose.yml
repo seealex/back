@@ -1,0 +1,25 @@
+  version: '3'
+  services:
+    frontend:
+      image: x1alex/angular
+      container_name: tweetit-angular
+      ports:
+        - "4400:80"
+      depends_on:
+        - node
+    node:
+      image: x1alex/node
+      container_name: tweetit-node
+      ports:
+        - "3000:3000"
+      dns:
+        - 8.8.8.8
+      depends_on:
+        - backend
+    backend:
+      image: x1alex/tweetit
+      container_name: tweetit-backend
+      ports:
+        - "8080:8080"
+      dns:
+        - 8.8.8.8
